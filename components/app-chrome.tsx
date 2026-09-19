@@ -19,6 +19,7 @@ import {
 import { NoticeBell, type OpenDisputeNotice } from "@/components/notice-bell";
 import { Wordmark } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { bookSearchHref } from "@/lib/book-search";
 import { DEMO_OPERATOR } from "@/lib/demo-session";
 import { cn } from "@/lib/utils";
 
@@ -47,25 +48,31 @@ export function AppChrome({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
 
-  function searchBook(next: string) {
+  function searchBook(next: string, submitted = false) {
     const trimmed = next.trim();
-    startTransition(() => {
-      if (/^dsp_/i.test(trimmed)) {
-        router.push(`/disputes/${trimmed}`);
-        return;
-      }
-      if (/^inv_/i.test(trimmed)) {
-        router.push(`/invoices/${trimmed}`);
-        return;
-      }
-      const params = new URLSearchParams();
-      if (trimmed) params.set("q", trimmed);
-      if (typeof window !== "undefined" && pathname === "/invoices") {
-        const status = new URLSearchParams(window.location.search).get("status");
-        if (status) params.set("status", status);
-      }
-      router.push(params.toString() ? `/invoices?${params}` : "/invoices");
+    const invoiceStatus =
+      pathname === "/invoices" && typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search).get("status")
+        : null;
+    const href = bookSearchHref(trimmed, {
+      submitted,
+      invoiceStatus,
+      allowEmpty: submitted || pathname === "/invoices",
     });
+    if (!href) return;
+    if (typeof window !== "undefined") {
+      const current = `${window.location.pathname}${window.location.search}`;
+      if (current === href) return;
+    }
+    startTransition(() => {
+      router.push(href);
+    });
+  }
+
+  function clearSearch() {
+    setQuery("");
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    searchBook("", pathname === "/invoices");
   }
 
   return (
@@ -83,7 +90,7 @@ export function AppChrome({
             </Link>
             <button
               type="button"
-              className="rounded-md p-1 text-muted-foreground lg:hidden"
+              className="rounded-md p-1 text-muted-foreground outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40 lg:hidden"
               onClick={() => setOpen(false)}
               aria-label="Close navigation"
             >
@@ -102,6 +109,7 @@ export function AppChrome({
                 <Link
                   key={item.href}
                   href={item.href}
+                  aria-current={active ? "page" : undefined}
                   onClick={() => setOpen(false)}
                   className={cn(
                     "flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors",
@@ -158,7 +166,7 @@ export function AppChrome({
         <header className="sticky top-0 z-20 flex h-16 items-center gap-3 border-b border-border bg-card/90 px-4 backdrop-blur-md sm:px-6">
           <button
             type="button"
-            className="rounded-md border border-border bg-card p-1.5 lg:hidden"
+            className="rounded-md border border-border bg-card p-1.5 outline-none focus-visible:ring-[3px] focus-visible:ring-ring/40 lg:hidden"
             onClick={() => setOpen(true)}
             aria-label="Open navigation"
           >
@@ -169,7 +177,7 @@ export function AppChrome({
             className="relative mx-auto min-w-0 flex-1 max-w-xl"
             onSubmit={(event) => {
               event.preventDefault();
-              searchBook(query);
+              searchBook(query, true);
             }}
           >
             <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -178,7 +186,12 @@ export function AppChrome({
               name="q"
               value={query}
               placeholder="Search invoices, customers, dsp_… or inv_…"
-              className="h-10 w-full rounded-lg border border-transparent bg-muted pr-3 pl-10 text-sm outline-none placeholder:text-muted-foreground focus:border-ring focus:bg-card focus:ring-[3px] focus:ring-ring/20"
+              autoComplete="off"
+              enterKeyHint="search"
+              className={cn(
+                "h-10 w-full rounded-lg border border-transparent bg-muted pl-10 text-sm outline-none placeholder:text-muted-foreground focus:border-ring focus:bg-card focus:ring-[3px] focus:ring-ring/20",
+                query ? "pr-10" : "pr-3",
+              )}
               aria-label="Search the book"
               onChange={(event) => {
                 const next = event.target.value;
@@ -187,6 +200,16 @@ export function AppChrome({
                 searchTimer.current = setTimeout(() => searchBook(next), 220);
               }}
             />
+            {query ? (
+              <button
+                type="button"
+                className="absolute top-1/2 right-2 -translate-y-1/2 rounded-md p-1 text-muted-foreground outline-none hover:bg-card hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/40"
+                aria-label="Clear search"
+                onClick={clearSearch}
+              >
+                <X className="size-3.5" />
+              </button>
+            ) : null}
           </form>
 
           <div className="flex items-center gap-1 sm:gap-2">

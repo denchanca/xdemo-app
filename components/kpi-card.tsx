@@ -22,7 +22,10 @@ export function KpiCard({
     <Card className="gap-3 py-5">
       <CardContent className="space-y-3">
         <div className="flex items-start justify-between gap-3">
-          <p className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
+          <p
+            className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground"
+            title={hint}
+          >
             {label}
             <Info className="size-3.5 shrink-0 opacity-60" aria-hidden="true" />
           </p>

@@ -41,9 +41,11 @@ export function NoticeBell({
     <div ref={root} className="relative">
       <button
         type="button"
-        className="relative rounded-full p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
+        className="relative rounded-full p-2 text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/40"
         aria-label="Open exceptions"
+        aria-haspopup="true"
         aria-expanded={open}
+        aria-controls="notice-bell-menu"
         onClick={() => setOpen((value) => !value)}
       >
         <Bell className="size-5" />
@@ -52,7 +54,10 @@ export function NoticeBell({
         ) : null}
       </button>
       {open ? (
-        <div className="absolute top-11 right-0 z-30 w-80 rounded-[var(--radius-lg)] border border-border bg-card p-3 shadow-[var(--shadow-card)]">
+        <div
+          id="notice-bell-menu"
+          className="absolute top-11 right-0 z-30 w-80 rounded-[var(--radius-lg)] border border-border bg-card p-3 shadow-[var(--shadow-card)]"
+        >
           <p className="text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">
             Open exceptions
           </p>

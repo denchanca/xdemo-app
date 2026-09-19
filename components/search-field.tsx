@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { Input } from "@/components/ui/input";
+import { invoiceListHref } from "@/lib/book-search";
 
 export function SearchField({
   defaultValue,
@@ -18,11 +19,13 @@ export function SearchField({
   const [value, setValue] = useState(defaultValue ?? "");
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  useEffect(() => {
+    const next = defaultValue ?? "";
+    setValue((current) => (current === next ? current : next));
+  }, [defaultValue]);
+
   function go(next: string) {
-    const params = new URLSearchParams();
-    if (status && status !== "ALL") params.set("status", status);
-    if (next.trim()) params.set("q", next.trim());
-    const href = params.toString() ? `/invoices?${params}` : "/invoices";
+    const href = invoiceListHref({ q: next, status });
     startTransition(() => {
       router.push(href);
     });

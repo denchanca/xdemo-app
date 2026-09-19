@@ -85,7 +85,7 @@ export async function getInvoices(filters?: { status?: string; q?: string }) {
       return false;
     }
     if (filters?.q) {
-      const haystack = `${invoice.number} ${invoice.customer.name} ${invoice.plan}`.toLowerCase();
+      const haystack = `${invoice.id} ${invoice.number} ${invoice.customer.name} ${invoice.plan}`.toLowerCase();
       if (!haystack.includes(filters.q.toLowerCase().trim())) {
         return false;
       }
