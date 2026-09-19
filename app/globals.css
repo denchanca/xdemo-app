@@ -186,3 +186,9 @@ body {
   background: var(--indigo-soft);
   color: var(--indigo);
 }
+
+/* Hide the UA search cancel so it does not fight controlled React state. */
+input[type="search"]::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}

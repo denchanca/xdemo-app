@@ -24,6 +24,7 @@ export function FilterPills({
           <Link
             key={item.id}
             href={href}
+            aria-current={active ? "page" : undefined}
             className={cn(
               "rounded-full border px-3 py-1 text-xs transition-colors",
               active
