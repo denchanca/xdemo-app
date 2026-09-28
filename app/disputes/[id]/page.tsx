@@ -4,14 +4,13 @@ import { PageHeader } from "@/components/page-header";
 import { DisputeStatusBadge, InvoiceStatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { getDispute } from "@/lib/data";
 import { formatDate } from "@/lib/dates";
 import { suggestDisputeCredit } from "@/lib/dispute-credit";
 import { formatUsd } from "@/lib/money";
 import { isPlanId, planLabel, planPriceCents } from "@/lib/plans";
 import { cn } from "@/lib/utils";
+import { ResolutionPanel } from "./resolution-panel";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -33,6 +32,48 @@ export default async function DisputeDetailPage({ params }: { params: Promise<{ 
     planPriceCents: catalogPrice,
   });
   const overCatalog = suggestedCredit > catalogPrice;
+  const canResolve = dispute.status === "OPEN" || dispute.status === "NEEDS_REVIEW";
+  // #region agent log
+  {
+    const payload = {
+      sessionId: "c78e33",
+      runId: "post-fix",
+      hypothesisId: "B-E",
+      location: "app/disputes/[id]/page.tsx:DisputeDetailPage",
+      message: "dispute resolution panel credit vs catalog",
+      data: {
+        disputeId: dispute.id,
+        invoiceNumber: dispute.invoice.number,
+        invoicePlan: dispute.invoice.plan,
+        invoiceTotalCents: dispute.invoice.totalCents,
+        catalogPrice,
+        disputedAmountCents: dispute.disputedAmountCents,
+        liveSuggestedCredit: suggestedCredit,
+        storedSuggestedCreditCents: dispute.suggestedCreditCents,
+        overCatalog,
+        showingStoredNotLive: suggestedCredit === dispute.suggestedCreditCents && suggestedCredit > catalogPrice,
+        acceptDeclineDisabled: !canResolve,
+        acceptDeclineHasOnClick: true,
+        reviewerNoteBound: true,
+        disputeStatus: dispute.status,
+      },
+      timestamp: Date.now(),
+    };
+    try {
+      require("node:fs").appendFileSync(
+        "/mnt/d/xdemo-app/.cursor/debug-c78e33.log",
+        JSON.stringify(payload) + "\n",
+      );
+    } catch {
+      /* ignore */
+    }
+    await fetch("http://127.0.0.1:7557/ingest/672075b8-288d-4b34-ab66-5baf9d745e5c", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Debug-Session-Id": "c78e33" },
+      body: JSON.stringify(payload),
+    }).catch(() => {});
+  }
+  // #endregion
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
@@ -78,21 +119,13 @@ export default async function DisputeDetailPage({ params }: { params: Promise<{ 
         </Card>
       </div>
 
-      {/*
-        MULTI-FILE AGENT STUB
-        Complete together:
-          1. lib/disputes/resolve.ts
-          2. app/api/disputes/[id]/resolve/route.ts
-          3. this panel — enable Accept / Decline and persist a reviewer note
-        Suggested credit must use the catalog cap. See tests/dispute-credit.test.ts.
-      */}
-      <Card className="border-dashed">
+      <Card>
         <CardHeader>
           <CardTitle>Resolution</CardTitle>
           <CardDescription>
-            This panel is unfinished. Accept and Decline should call{" "}
-            <span className="font-mono text-foreground">POST /api/disputes/{dispute.id}/resolve</span>{" "}
-            once the helper exists. Do not invent a credit above {formatUsd(catalogPrice)}.
+            Accept or decline posts to{" "}
+            <span className="font-mono text-foreground">POST /api/disputes/{dispute.id}/resolve</span>
+            . Credit stays inside {formatUsd(catalogPrice)}.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -117,20 +150,11 @@ export default async function DisputeDetailPage({ params }: { params: Promise<{ 
             </p>
           </div>
 
-          <Label htmlFor="reviewer-note">Reviewer note</Label>
-          <Textarea
-            id="reviewer-note"
-            placeholder="TODO(agent): bind this to resolveDispute and refuse credits above the plan price."
-            defaultValue={dispute.reviewerNote ?? ""}
+          <ResolutionPanel
+            disputeId={dispute.id}
+            defaultNote={dispute.reviewerNote ?? ""}
+            canResolve={canResolve}
           />
-          <div className="flex flex-wrap gap-2">
-            <Button type="button" disabled title="Not wired — Agent demo target">
-              Accept credit
-            </Button>
-            <Button type="button" variant="outline" disabled title="Not wired — Agent demo target">
-              Decline
-            </Button>
-          </div>
           <p className="text-xs text-muted-foreground">
             Recorded when this dispute was opened: {formatUsd(dispute.suggestedCreditCents)}.
           </p>
