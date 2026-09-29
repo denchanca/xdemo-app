@@ -16,6 +16,7 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
+import { ContrastToggle } from "@/components/contrast-toggle";
 import { NoticeBell, type OpenDisputeNotice } from "@/components/notice-bell";
 import { Wordmark } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -190,6 +191,7 @@ export function AppChrome({
           </form>
 
           <div className="flex items-center gap-1 sm:gap-2">
+            <ContrastToggle />
             <ThemeToggle />
             <NoticeBell openDisputeCount={openDisputeCount} openDisputes={openDisputes} />
             <div

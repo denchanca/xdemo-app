@@ -1,11 +1,6 @@
 /**
- * INTENTIONAL FAIL — Cloud Agent target
- *
- * This test is supposed to fail on main. Do not "clean it up" in a local
- * lint pass unless asked to cap suggested credit at the catalog plan price.
- *
+ * Caps suggested credit at the catalog plan price.
  * Expected: min(disputedAmountCents, planPriceCents)
- * Actual today: suggestDisputeCredit returns the disputed amount uncapped.
  */
 import { describe, expect, it } from "vitest";
 import { suggestDisputeCredit } from "@/lib/dispute-credit";

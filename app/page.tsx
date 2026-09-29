@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AlertTriangle, CalendarRange, CircleDollarSign, FileText, TrendingUp } from "lucide-react";
 import { DisputeDonut } from "@/components/charts/dispute-donut";
+import { RevenueDisputeScatter } from "@/components/charts/revenue-dispute-scatter";
 import { RevenueChart } from "@/components/charts/revenue-chart";
 import { InvoiceTable } from "@/components/invoice-table";
 import { KpiCard } from "@/components/kpi-card";
@@ -16,7 +17,7 @@ export const metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  const { invoices, series, breakdown, kpis } = await getDashboard();
+  const { invoices, series, breakdown, scatter, kpis } = await getDashboard();
   const recent = invoices.filter((invoice) => invoice.status !== "VOID" && invoice.status !== "DRAFT").slice(0, 5);
 
   return (
@@ -67,6 +68,15 @@ export default async function DashboardPage() {
           tone="success"
         />
       </section>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Revenue vs disputes</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <RevenueDisputeScatter points={scatter} />
+        </CardContent>
+      </Card>
 
       <section className="grid gap-4 lg:grid-cols-[minmax(0,1.7fr)_minmax(260px,0.9fr)]">
         <Card>

@@ -7,6 +7,7 @@ import {
   disputeCentsAt,
   openCentsAt,
   percentChange,
+  revenueDisputePoints,
   revenueSeries,
 } from "@/lib/dashboard";
 import type { DisputeStatus, InvoiceStatus } from "@/lib/status";
@@ -51,6 +52,15 @@ export async function getDashboard() {
     disputes,
     series: revenueSeries(invoices, currentStart, currentEnd),
     breakdown: disputeBreakdown(disputes),
+    scatter: revenueDisputePoints(
+      invoices.map((invoice) => ({
+        customerId: invoice.customerId,
+        customerName: invoice.customer.name,
+        status: invoice.status,
+        totalCents: invoice.totalCents,
+        disputes: invoice.disputes,
+      })),
+    ),
     kpis: {
       mrrCents: catalogMrrCents(customers),
       accountCount: customers.length,

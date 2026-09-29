@@ -119,6 +119,57 @@
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.24), 0 12px 28px -16px rgba(0, 0, 0, 0.45);
 }
 
+/* High contrast, high visibility. Black, white, and yellow only where the pair stays above 7:1. */
+html.contrast {
+  --indigo: #000080;
+  --indigo-600: #000080;
+  --indigo-500: #000066;
+  --indigo-soft: #fff200;
+  --indigo-page: #000080;
+  --indigo-page-soft: #fff7a8;
+  --ink: #000000;
+  --ink-soft: #000000;
+  --paper: #ffffff;
+  --paper-elevated: #ffffff;
+  --line: #000000;
+  --success: #005000;
+  --success-soft: #ffffff;
+  --warning: #5c3a00;
+  --warning-soft: #ffffff;
+  --danger: #8b0000;
+  --danger-soft: #ffffff;
+
+  --background: #ffffff;
+  --foreground: #000000;
+  --card: #ffffff;
+  --card-foreground: #000000;
+  --popover: #ffffff;
+  --popover-foreground: #000000;
+  --primary: #000000;
+  --primary-foreground: #fff200;
+  --secondary: #ffffff;
+  --secondary-foreground: #000000;
+  --muted: #fff7a8;
+  --muted-foreground: #000000;
+  --accent: #fff200;
+  --accent-foreground: #000000;
+  --destructive: #8b0000;
+  --border: #000000;
+  --input: #000000;
+  --ring: #000000;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #000000;
+  --sidebar-accent: #fff200;
+  --shadow-card: none;
+  --logo-ground: #000000;
+  --logo-fold: #fff200;
+  --logo-fold-soft: #fff7a8;
+  --logo-bar: #fff200;
+  --logo-seam: #000000;
+  color-scheme: light;
+  font-size: 112.5%;
+}
+
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
@@ -174,6 +225,127 @@ html {
 
 html.dark {
   color-scheme: dark;
+}
+
+html.contrast,
+html.contrast.dark {
+  color-scheme: light;
+}
+
+html.contrast body {
+  font-weight: 500;
+  line-height: 1.55;
+}
+
+html.contrast header {
+  background-color: #ffffff;
+  backdrop-filter: none;
+}
+
+html.contrast .border,
+html.contrast .border-b,
+html.contrast .border-r,
+html.contrast .border-t,
+html.contrast .border-l {
+  border-color: #000000;
+}
+
+html.contrast .border {
+  border-width: 2px;
+}
+
+html.contrast .border-b {
+  border-bottom-width: 2px;
+}
+
+html.contrast tr.border-b:last-child {
+  border-bottom-width: 0;
+}
+
+html.contrast .border-r {
+  border-right-width: 2px;
+}
+
+html.contrast .border-t {
+  border-top-width: 2px;
+}
+
+html.contrast input,
+html.contrast textarea,
+html.contrast select {
+  border: 2px solid #000000;
+  background-color: #fffef2;
+  color: #000000;
+}
+
+html.contrast button:disabled,
+html.contrast input:disabled,
+html.contrast textarea:disabled {
+  opacity: 1 !important;
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 2px dashed #000000 !important;
+}
+
+html.contrast ::placeholder {
+  color: #000000;
+  opacity: 1;
+}
+
+html.contrast a {
+  text-underline-offset: 0.16em;
+}
+
+html.contrast a:not([aria-label="Ledgerly home"]) {
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+}
+
+html.contrast :focus-visible {
+  outline: 3px solid #000000;
+  outline-offset: 3px;
+}
+
+html.contrast [data-slot="badge"] {
+  border: 2px solid currentColor;
+  background: #ffffff;
+  font-weight: 700;
+}
+
+html.contrast .opacity-60,
+html.contrast .shadow-xs {
+  opacity: 1;
+  box-shadow: none;
+}
+
+html.contrast .text-\[11px\] {
+  font-size: 0.875rem;
+  font-weight: 650;
+}
+
+html.contrast ::selection {
+  background: #000000;
+  color: #fff200;
+}
+
+html.contrast #ledgerlyRevenue stop:first-child {
+  stop-color: #fff200;
+  stop-opacity: 0.95;
+}
+
+html.contrast #ledgerlyRevenue stop:last-child {
+  stop-color: #ffffff;
+  stop-opacity: 1;
+}
+
+html.contrast .revenue-line {
+  stroke: #000000;
+  stroke-width: 3.5px;
+}
+
+html.contrast .revenue-dot circle {
+  fill: #000000;
+  opacity: 1;
 }
 
 body {

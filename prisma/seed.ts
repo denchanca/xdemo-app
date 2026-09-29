@@ -2,11 +2,16 @@ import { execSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { PrismaClient } from "@prisma/client";
+import { PrismaLibSQL } from "@prisma/adapter-libsql";
 import { demoDay } from "../lib/clock";
 import { suggestDisputeCredit } from "../lib/dispute-credit";
 import { planPriceCents } from "../lib/plans";
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  adapter: new PrismaLibSQL({
+    url: `file:${join(__dirname, "dev.db")}`,
+  }),
+});
 
 /**
  * Collections 4.2 corpus accounts (workshop/data/canon.json). Seeding them as

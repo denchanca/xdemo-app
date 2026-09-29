@@ -1,11 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { DisputeResolutionActions } from "@/components/dispute-resolution-actions";
 import { PageHeader } from "@/components/page-header";
 import { DisputeStatusBadge, InvoiceStatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { getDispute } from "@/lib/data";
 import { formatDate } from "@/lib/dates";
 import { suggestDisputeCredit } from "@/lib/dispute-credit";
@@ -33,6 +32,9 @@ export default async function DisputeDetailPage({ params }: { params: Promise<{ 
     planPriceCents: catalogPrice,
   });
   const overCatalog = suggestedCredit > catalogPrice;
+  // #region agent log
+  {const payload={sessionId:'f8c635',runId:'post-fix',hypothesisId:'B',location:'app/disputes/[id]/page.tsx:DisputeDetailPage',message:'dispute page credit vs invoice',data:{disputeId:dispute.id,invoiceId:dispute.invoice.id,invoiceNumber:dispute.invoice.number,plan:dispute.invoice.plan,invoiceTotalCents:dispute.invoice.totalCents,catalogPrice,disputedAmountCents:dispute.disputedAmountCents,liveSuggestedCredit:suggestedCredit,storedSuggestedCreditCents:dispute.suggestedCreditCents,overCatalog,liveExceedsInvoice:suggestedCredit>dispute.invoice.totalCents,storedExceedsInvoice:dispute.suggestedCreditCents>dispute.invoice.totalCents,catalogMatchesInvoice:catalogPrice===dispute.invoice.totalCents},timestamp:Date.now()};try{require('fs').appendFileSync('/mnt/d/xdemo-app/.cursor/debug-f8c635.log',JSON.stringify(payload)+'\n');}catch{}await fetch('http://127.0.0.1:7480/ingest/56795edd-30ac-4aa4-8e93-cfa4d2e2433b',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'f8c635'},body:JSON.stringify(payload)}).catch(()=>{});}
+  // #endregion
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
@@ -90,9 +92,8 @@ export default async function DisputeDetailPage({ params }: { params: Promise<{ 
         <CardHeader>
           <CardTitle>Resolution</CardTitle>
           <CardDescription>
-            This panel is unfinished. Accept and Decline should call{" "}
-            <span className="font-mono text-foreground">POST /api/disputes/{dispute.id}/resolve</span>{" "}
-            once the helper exists. Do not invent a credit above {formatUsd(catalogPrice)}.
+            Accept or decline against the {planLabel(dispute.invoice.plan)} catalog price of{" "}
+            {formatUsd(catalogPrice)}. Do not invent a credit above that amount.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -117,20 +118,11 @@ export default async function DisputeDetailPage({ params }: { params: Promise<{ 
             </p>
           </div>
 
-          <Label htmlFor="reviewer-note">Reviewer note</Label>
-          <Textarea
-            id="reviewer-note"
-            placeholder="TODO(agent): bind this to resolveDispute and refuse credits above the plan price."
-            defaultValue={dispute.reviewerNote ?? ""}
+          <DisputeResolutionActions
+            disputeId={dispute.id}
+            initialNote={dispute.reviewerNote ?? ""}
+            locked={dispute.status === "ACCEPTED" || dispute.status === "DECLINED"}
           />
-          <div className="flex flex-wrap gap-2">
-            <Button type="button" disabled title="Not wired — Agent demo target">
-              Accept credit
-            </Button>
-            <Button type="button" variant="outline" disabled title="Not wired — Agent demo target">
-              Decline
-            </Button>
-          </div>
           <p className="text-xs text-muted-foreground">
             Recorded when this dispute was opened: {formatUsd(dispute.suggestedCreditCents)}.
           </p>
