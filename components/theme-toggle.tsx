@@ -8,7 +8,8 @@ const STORAGE_KEY = "ledgerly-theme";
 function applyTheme(theme: "light" | "dark") {
   const root = document.documentElement;
   root.classList.toggle("dark", theme === "dark");
-  root.style.colorScheme = theme;
+  const contrast = root.classList.contains("contrast");
+  root.style.colorScheme = contrast ? "light" : theme;
 }
 
 function readTheme(): "light" | "dark" {

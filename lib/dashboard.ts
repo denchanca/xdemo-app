@@ -82,6 +82,43 @@ export function revenueSeries(invoices: InvoiceLike[], start: Date, end: Date) {
   return points;
 }
 
+type ScatterInvoice = {
+  customerId: string;
+  customerName: string;
+  status: string;
+  totalCents: number;
+  disputes: { disputedAmountCents: number }[];
+};
+
+export type RevenueDisputePoint = {
+  id: string;
+  name: string;
+  revenueCents: number;
+  disputeCents: number;
+};
+
+/** One point per customer: billed invoices (drafts and voids omitted) against dispute amounts on file. */
+export function revenueDisputePoints(invoices: ScatterInvoice[]): RevenueDisputePoint[] {
+  const byCustomer = new Map<string, RevenueDisputePoint>();
+
+  for (const invoice of invoices) {
+    if (invoice.status === "VOID" || invoice.status === "DRAFT") continue;
+    const current = byCustomer.get(invoice.customerId) ?? {
+      id: invoice.customerId,
+      name: invoice.customerName,
+      revenueCents: 0,
+      disputeCents: 0,
+    };
+    current.revenueCents += invoice.totalCents;
+    current.disputeCents += sumCents(invoice.disputes.map((dispute) => dispute.disputedAmountCents));
+    byCustomer.set(invoice.customerId, current);
+  }
+
+  return [...byCustomer.values()].sort(
+    (a, b) => a.revenueCents - b.revenueCents || a.name.localeCompare(b.name),
+  );
+}
+
 export function disputeBreakdown(disputes: DisputeLike[]) {
   const needsResponse = disputes.filter((dispute) => dispute.status === "NEEDS_REVIEW").length;
   const inReview = disputes.filter((dispute) => dispute.status === "OPEN").length;
@@ -89,9 +126,9 @@ export function disputeBreakdown(disputes: DisputeLike[]) {
     (dispute) => dispute.status === "ACCEPTED" || dispute.status === "DECLINED",
   ).length;
   return [
-    { id: "needs", label: "Needs response", count: needsResponse, color: "#dc2626" },
-    { id: "review", label: "In review", count: inReview, color: "#d97706" },
-    { id: "resolved", label: "Resolved", color: "#4f46e5", count: resolved },
+    { id: "needs", label: "Needs response", count: needsResponse, color: "var(--danger)" },
+    { id: "review", label: "In review", count: inReview, color: "var(--warning)" },
+    { id: "resolved", label: "Resolved", color: "var(--indigo)", count: resolved },
   ] as const;
 }
 

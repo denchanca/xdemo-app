@@ -39,7 +39,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script
           dangerouslySetInnerHTML={{
             __html:
-              "(function(){try{if(localStorage.getItem('ledgerly-theme')==='dark'){document.documentElement.classList.add('dark');document.documentElement.style.colorScheme='dark';}}catch(e){}})();",
+              "(function(){try{var r=document.documentElement;if(localStorage.getItem('ledgerly-theme')==='dark'){r.classList.add('dark');r.style.colorScheme='dark';}if(localStorage.getItem('ledgerly-contrast')==='on'){r.classList.add('contrast');r.style.colorScheme='light';}}catch(e){}})();",
           }}
         />
         <AppShell>{children}</AppShell>
